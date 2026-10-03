@@ -1,0 +1,687 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>6-Month Backend Plan</title>
+    <style>
+      :root {
+        --bg: #f2f5f7;
+        --panel: #fff;
+        --ink: #14212b;
+        --mute: #5d6b76;
+        --line: #d9e0e5;
+        --acc: #2f5bea;
+        --ok: #1f9d6b;
+        --gold: #c58a00;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0f161c;
+          --panel: #17212a;
+          --ink: #e8eef2;
+          --mute: #8fa0ac;
+          --line: #263541;
+          --acc: #6f93ff;
+          --ok: #3cc08c;
+          --gold: #e0a82e;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font:
+          16px/1.5 "Segoe UI",
+          Inter,
+          system-ui,
+          sans-serif;
+      }
+      main {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 28px 18px 60px;
+      }
+      h1 {
+        font-size: 1.9rem;
+        margin: 0 0 4px;
+        letter-spacing: -0.02em;
+      }
+      .sub {
+        color: var(--mute);
+        margin: 0 0 22px;
+      }
+      .strip {
+        display: grid;
+        grid-template-columns: repeat(24, 1fr);
+        gap: 4px;
+        margin: 0 0 6px;
+      }
+      .cell {
+        height: 34px;
+        border-radius: 3px;
+        background: var(--line);
+        position: relative;
+        cursor: pointer;
+        border: 0;
+        padding: 0;
+      }
+      .cell[data-l="1"] {
+        background: color-mix(in srgb, var(--ok) 30%, var(--line));
+      }
+      .cell[data-l="2"] {
+        background: color-mix(in srgb, var(--ok) 55%, var(--line));
+      }
+      .cell[data-l="3"] {
+        background: color-mix(in srgb, var(--ok) 80%, var(--line));
+      }
+      .cell[data-l="4"] {
+        background: var(--ok);
+      }
+      .cell.now {
+        outline: 2px solid var(--acc);
+        outline-offset: 2px;
+      }
+      .cell.int::after {
+        content: "";
+        position: absolute;
+        left: -3px;
+        top: -6px;
+        bottom: -6px;
+        width: 2px;
+        background: var(--gold);
+      }
+      .legend {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.8rem;
+        color: var(--mute);
+        margin-bottom: 22px;
+      }
+      .legend b {
+        color: var(--gold);
+        font-weight: 600;
+      }
+      .stats {
+        display: flex;
+        gap: 28px;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        margin-bottom: 26px;
+      }
+      .stat .n {
+        font-size: 2rem;
+        font-weight: 700;
+        line-height: 1;
+      }
+      .stat .l {
+        font-size: 0.85rem;
+        color: var(--mute);
+      }
+      .lc button,
+      .bar button,
+      .bar label {
+        font: inherit;
+        font-size: 0.85rem;
+        border: 1px solid var(--line);
+        background: var(--panel);
+        color: var(--ink);
+        border-radius: 6px;
+        padding: 4px 10px;
+        cursor: pointer;
+      }
+      .bar {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-top: 34px;
+        color: var(--mute);
+        font-size: 0.85rem;
+      }
+      .bar input[type="date"] {
+        font: inherit;
+        border: 1px solid var(--line);
+        background: var(--panel);
+        color: var(--ink);
+        border-radius: 6px;
+        padding: 3px 6px;
+      }
+      .tabs {
+        display: flex;
+        gap: 2px;
+        border-bottom: 1px solid var(--line);
+        margin-bottom: 14px;
+        overflow-x: auto;
+      }
+      .tab {
+        font: inherit;
+        background: none;
+        border: 0;
+        border-bottom: 3px solid transparent;
+        padding: 10px 14px;
+        color: var(--mute);
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      .tab[aria-selected="true"] {
+        color: var(--ink);
+        border-color: var(--acc);
+        font-weight: 600;
+      }
+      .mt {
+        color: var(--mute);
+        margin: 0 0 14px;
+      }
+      .week {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 14px 16px;
+        margin-bottom: 12px;
+      }
+      .week.now {
+        border-color: var(--acc);
+      }
+      .wh {
+        display: flex;
+        justify-content: space-between;
+        font-weight: 600;
+        margin-bottom: 6px;
+      }
+      .wh span {
+        font-weight: 400;
+        color: var(--mute);
+        font-size: 0.85rem;
+      }
+      .t {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        padding: 5px 0;
+        cursor: pointer;
+      }
+      .t input {
+        margin-top: 5px;
+        accent-color: var(--ok);
+        width: 16px;
+        height: 16px;
+      }
+      .t .k {
+        min-width: 62px;
+        color: var(--mute);
+        font-size: 0.85rem;
+        padding-top: 2px;
+      }
+      .t.d .x {
+        text-decoration: line-through;
+        color: var(--mute);
+      }
+      h2 {
+        font-size: 1.15rem;
+        margin: 36px 0 10px;
+      }
+      details {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 16px;
+        margin-bottom: 8px;
+      }
+      summary {
+        cursor: pointer;
+        font-weight: 600;
+      }
+      li {
+        margin: 4px 0;
+      }
+      a {
+        color: var(--acc);
+      }
+      :focus-visible {
+        outline: 2px solid var(--acc);
+        outline-offset: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Six months to a stronger backend profile</h1>
+      <p class="sub">
+        Java and Spring Boot, LeetCode, HLD and LLD. About 10 hours a week.
+        Interviews start in month 4.
+      </p>
+
+      <div class="strip" id="strip" role="list" aria-label="24 weeks"></div>
+      <div class="legend">
+        <span>Week 1</span
+        ><span><b>Gold line:</b> start interviewing (week 13)</span
+        ><span>Week 24</span>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="n" id="pct">0%</div>
+          <div class="l">tasks done</div>
+        </div>
+        <div class="stat">
+          <div class="n" id="wk">-</div>
+          <div class="l">current week</div>
+        </div>
+        <div class="stat lc">
+          <div class="n">
+            <span id="lc">0</span
+            ><span style="font-size: 1rem; color: var(--mute)"> / 150</span>
+          </div>
+          <div class="l">
+            LeetCode solved <button id="m" aria-label="Remove one">-</button>
+            <button id="p" aria-label="Add one">+</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tabs" id="tabs" role="tablist"></div>
+      <p class="mt" id="mt"></p>
+      <div id="weeks"></div>
+
+      <h2>Resources</h2>
+      <div id="res"></div>
+
+      <div class="bar">
+        <label for="start">Plan start date</label
+        ><input type="date" id="start" />
+        <button id="exp">Export progress</button>
+        <label
+          >Import<input type="file" id="imp" accept=".json" hidden
+        /></label>
+        <span>Progress is also saved in this browser.</span>
+      </div>
+      <div class="bar">
+        <button id="sy">GitHub sync</button><span id="ss">Not connected</span>
+      </div>
+    </main>
+
+    <script>
+      const M = [
+        {
+          n: "Foundations",
+          m: "Core Java, first LeetCode patterns, system design basics.",
+          dsa: ["Arrays & hashing", "Two pointers", "Stack", "Binary search"],
+          java: [
+            "Java syntax & OOP",
+            "Collections & generics",
+            "Streams & lambdas",
+            "Exceptions, IO, JUnit",
+          ],
+          hld: [
+            "Scaling, load balancers",
+            "Caching & CDN",
+            "DB indexing, sharding, replication",
+            "CAP, consistency, queues",
+          ],
+          lld: [
+            "SOLID",
+            "Creational patterns",
+            "Structural patterns",
+            "Behavioral patterns",
+          ],
+        },
+        {
+          n: "Spring & design practice",
+          m: "Concurrency, Spring core, first full designs.",
+          dsa: ["Sliding window", "Linked list", "Trees I", "Trees II"],
+          java: [
+            "Threads & executors",
+            "CompletableFuture & locks",
+            "JVM memory & GC",
+            "Spring core & DI",
+          ],
+          hld: [
+            "URL shortener",
+            "Rate limiter",
+            "Chat system",
+            "Notification service",
+          ],
+          lld: ["Parking lot", "LRU cache", "Splitwise", "Elevator"],
+        },
+        {
+          n: "Build the project",
+          m: "Spring Boot service with Postgres, Redis and Kafka.",
+          dsa: ["Tries & heap", "Backtracking", "Graphs I", "Graphs II"],
+          java: [
+            "REST + validation",
+            "Spring Data JPA",
+            "Spring Security + JWT",
+            "Kafka + Redis integration",
+          ],
+          hld: [
+            "News feed",
+            "Payment system",
+            "Distributed queue",
+            "Distributed cache",
+          ],
+          lld: [
+            "Rate limiter (code)",
+            "BookMyShow",
+            "Logger framework",
+            "Vending machine",
+          ],
+        },
+        {
+          n: "Ship it and start interviewing",
+          m: "Finish the project, update the resume, begin applying.",
+          dsa: ["1-D DP", "2-D DP", "Greedy & intervals", "Bit tricks & math"],
+          java: [
+            "Project: Docker + tests",
+            "Project: observability",
+            "Project: Kubernetes deploy",
+            "Project: README + demo",
+          ],
+          hld: [
+            "File storage",
+            "Search autocomplete",
+            "Ride sharing",
+            "Video streaming",
+          ],
+          lld: ["Chess", "Food delivery", "Notification system", "Pub-sub"],
+        },
+        {
+          n: "Sharpen",
+          m: "Timed practice and mock interviews every week.",
+          dsa: [
+            "Timed mediums: arrays, strings",
+            "Timed mediums: trees, graphs",
+            "Timed mediums: DP",
+            "Redo failed problems",
+          ],
+          java: [
+            "Java interview questions",
+            "Spring interview questions",
+            "Concurrency problems",
+            "Fix weak spots",
+          ],
+          hld: [
+            "Multi-tenant control plane",
+            "CI/CD system",
+            "Metrics & logging pipeline",
+            "Job scheduler",
+          ],
+          lld: [
+            "Timed LLD mock 1",
+            "Timed LLD mock 2",
+            "Timed LLD mock 3",
+            "Timed LLD mock 4",
+          ],
+        },
+        {
+          n: "Convert",
+          m: "Interview loops, offers, negotiation.",
+          dsa: [
+            "Company-tagged mediums",
+            "Company-tagged mediums",
+            "Hard problems",
+            "Mocks & revisit",
+          ],
+          java: [
+            "Mock Java round",
+            "Mock Java round",
+            "Mock Java round",
+            "Mock Java round",
+          ],
+          hld: [
+            "45-min full mock",
+            "45-min full mock",
+            "45-min full mock",
+            "45-min full mock",
+          ],
+          lld: [
+            "Timed LLD mock",
+            "Timed LLD mock",
+            "Timed LLD mock",
+            "Timed LLD mock",
+          ],
+        },
+      ];
+      const K = [
+        ["dsa", "LeetCode"],
+        ["java", "Java"],
+        ["hld", "HLD"],
+        ["lld", "LLD"],
+      ];
+      const R = {
+        "DSA / LeetCode": [
+          "<a href='https://neetcode.io/practice' target='_blank' rel='noopener'>NeetCode 150</a> and the NeetCode YouTube channel (main track, about 6 problems a week)",
+          "Striver's A2Z DSA sheet and YouTube playlist (alternative explanations)",
+          "Book: Cracking the Coding Interview (reference for patterns)",
+          "Udemy: Master the Coding Interview: Data Structures + Algorithms (Andrei Neagoie)",
+          "Codeforces long-run: monthly Div 3/4 contest, CP-Algorithms for theory",
+        ],
+        "Java and Spring Boot": [
+          "Udemy: Java Programming Masterclass (Tim Buchalka)",
+          "Udemy: Java Multithreading, Concurrency & Performance (Michael Pogrebinsky)",
+          "Udemy: Spring Boot 3, Spring 6 & Hibernate for Beginners (Chad Darby)",
+          "YouTube: Amigoscode, Java Brains; docs and guides on Baeldung",
+          "Book: Effective Java (Joshua Bloch)",
+        ],
+        "High-level design": [
+          "Book: Designing Data-Intensive Applications (Kleppmann), pace one chapter every 1-2 weeks",
+          "Book: System Design Interview vol. 1 and 2 (Alex Xu)",
+          "YouTube: ByteByteGo, Gaurav Sen, Hello Interview",
+          "Practice out loud: state requirements, estimate scale, then discuss tradeoffs",
+        ],
+        "Low-level design": [
+          "Book: Head First Design Patterns",
+          "Refactoring Guru (patterns with Java examples)",
+          "YouTube: Concept && Coding (LLD playlist)",
+          "Code every problem in Java with a runnable main and unit tests",
+        ],
+      };
+      const S = "plan-v1";
+      let st;
+      try {
+        st = JSON.parse(localStorage.getItem(S));
+      } catch (e) {}
+      st = st || { d: {}, lc: 0, start: "" };
+      let cur = 0;
+      let tm;
+      const save = () => {
+        try {
+          localStorage.setItem(S, JSON.stringify(st));
+        } catch (e) {}
+        clearTimeout(tm);
+        tm = setTimeout(push, 1500);
+      };
+      const $ = (i) => document.getElementById(i);
+      const wkDone = (w) => K.filter(([k]) => st.d["w" + w + k]).length;
+      function nowWeek() {
+        if (!st.start) return -1;
+        const d = Math.floor((Date.now() - new Date(st.start)) / 6048e5);
+        return d >= 0 && d < 24 ? d : -1;
+      }
+      function render() {
+        const nw = nowWeek();
+        $("strip").innerHTML = Array.from(
+          { length: 24 },
+          (_, w) =>
+            `<button class="cell${w == nw ? " now" : ""}${w == 12 ? " int" : ""}" data-l="${wkDone(w)}" data-w="${w}" title="Week ${w + 1}" aria-label="Week ${w + 1}, ${wkDone(w)} of 4 done"></button>`,
+        ).join("");
+        let t = 0;
+        for (let w = 0; w < 24; w++) t += wkDone(w);
+        $("pct").textContent = Math.round((t / 96) * 100) + "%";
+        $("wk").textContent = nw < 0 ? "-" : nw + 1;
+        $("lc").textContent = st.lc;
+        $("start").value = st.start;
+        $("tabs").innerHTML = M.map(
+          (m, i) =>
+            `<button class="tab" role="tab" aria-selected="${i == cur}" data-m="${i}">Month ${i + 1}</button>`,
+        ).join("");
+        const m = M[cur];
+        $("mt").innerHTML = `<b>${m.n}.</b> ${m.m}`;
+        $("weeks").innerHTML = [0, 1, 2, 3]
+          .map((j) => {
+            const w = cur * 4 + j;
+            return (
+              `<div class="week${w == nw ? " now" : ""}"><div class="wh">Week ${w + 1}<span>${wkDone(w)}/4</span></div>` +
+              K.map(([k, l]) => {
+                const id = "w" + w + k;
+                const x = st.d[id];
+                return `<label class="t${x ? " d" : ""}"><input type="checkbox" data-id="${id}"${x ? " checked" : ""}><span class="k">${l}</span><span class="x">${m[k][j]}${k == "dsa" ? " (6 problems)" : ""}</span></label>`;
+              }).join("") +
+              `</div>`
+            );
+          })
+          .join("");
+      }
+      document.addEventListener("click", (e) => {
+        const c = e.target.closest(".cell");
+        if (c) {
+          cur = Math.floor(c.dataset.w / 4);
+          render();
+          return;
+        }
+        const t = e.target.closest(".tab");
+        if (t) {
+          cur = +t.dataset.m;
+          render();
+        }
+      });
+      document.addEventListener("change", (e) => {
+        if (e.target.dataset.id) {
+          st.d[e.target.dataset.id] = e.target.checked;
+          save();
+          render();
+        }
+      });
+      $("p").onclick = () => {
+        st.lc++;
+        save();
+        render();
+      };
+      $("m").onclick = () => {
+        st.lc = Math.max(0, st.lc - 1);
+        save();
+        render();
+      };
+      $("start").onchange = (e) => {
+        st.start = e.target.value;
+        save();
+        render();
+      };
+      $("exp").onclick = () => {
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(
+          new Blob([JSON.stringify(st)], { type: "application/json" }),
+        );
+        a.download = "plan-progress.json";
+        a.click();
+      };
+      $("imp").onchange = (e) => {
+        const f = e.target.files[0];
+        if (!f) return;
+        f.text().then((x) => {
+          try {
+            st = JSON.parse(x);
+            save();
+            render();
+          } catch (_) {
+            alert("That file is not a valid progress export.");
+          }
+        });
+      };
+      $("res").innerHTML = Object.entries(R)
+        .map(
+          ([h, l]) =>
+            `<details><summary>${h}</summary><ul>${l.map((i) => `<li>${i}</li>`).join("")}</ul></details>`,
+        )
+        .join("");
+      const G = "plan-gh";
+      let gh,
+        sha = null;
+      try {
+        gh = JSON.parse(localStorage.getItem(G));
+      } catch (e) {}
+      const api = () =>
+        `https://api.github.com/repos/${gh.repo}/contents/progress.json`;
+      const H = () => ({
+        Authorization: "Bearer " + gh.token,
+        Accept: "application/vnd.github+json",
+      });
+      const status = (t) => {
+        $("ss").textContent = t;
+      };
+      async function pull() {
+        if (!gh) return;
+        status("Connecting...");
+        try {
+          const r = await fetch(api(), { headers: H(), cache: "no-store" });
+          if (r.status == 404) {
+            sha = null;
+            status("Connected. progress.json is created on your first change.");
+            return;
+          }
+          if (!r.ok) throw 0;
+          const j = await r.json();
+          sha = j.sha;
+          st = JSON.parse(atob(j.content.replace(/\n/g, "")));
+          try {
+            localStorage.setItem(S, JSON.stringify(st));
+          } catch (e) {}
+          render();
+          status("Loaded from progress.json");
+        } catch (e) {
+          status("Could not connect. Check the repo name and token.");
+        }
+      }
+      async function push() {
+        if (!gh) return;
+        status("Saving...");
+        try {
+          const r = await fetch(api(), {
+            method: "PUT",
+            headers: H(),
+            body: JSON.stringify({
+              message: "Update progress",
+              content: btoa(JSON.stringify(st, null, 1)),
+              ...(sha ? { sha } : {}),
+            }),
+          });
+          if (r.status == 409 || r.status == 422) {
+            status("Out of date. Reload the page to load the latest progress.");
+            return;
+          }
+          if (!r.ok) throw 0;
+          sha = (await r.json()).content.sha;
+          status("Saved to progress.json");
+        } catch (e) {
+          status(
+            "Save failed. Check that the token has Contents: read and write.",
+          );
+        }
+      }
+      $("sy").onclick = () => {
+        if (gh && confirm("Disconnect GitHub sync?")) {
+          gh = null;
+          localStorage.removeItem(G);
+          status("Not connected");
+          return;
+        }
+        const repo = prompt(
+          "Repository (owner/name), e.g. nan-dan/backend-plan",
+        );
+        if (!repo) return;
+        const token = prompt(
+          "Fine-grained token with Contents: read and write for this repo only",
+        );
+        if (!token) return;
+        gh = { repo: repo.trim(), token: token.trim() };
+        localStorage.setItem(G, JSON.stringify(gh));
+        pull();
+      };
+      render();
+      pull();
+    </script>
+  </body>
+</html>
